@@ -1,0 +1,65 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load data
+data_2015 = pd.read_csv('C:/Users/MZ02-JULEE/Downloads/2015.csv')
+data_2016 = pd.read_csv('C:/Users/MZ02-JULEE/Downloads/2016.csv')
+
+# Create and visualize the correlation matrix
+correlation_matrix = data_2015.corr()
+plt.figure(figsize=(10, 8))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
+plt.title("Correlation Matrix of Happiness Factors (2015)")
+plt.show()
+
+# Select features
+features = ['Economy (GDP per Capita)', 'Family', 'Health (Life Expectancy)', 
+            'Freedom', 'Trust (Government Corruption)', 'Generosity']
+target = 'Happiness Score'
+
+# Split data
+X = data_2015[features]
+y = data_2015[target]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize and train models
+linear_model = LinearRegression()
+random_forest_model = RandomForestRegressor(n_estimators=100, random_state=42)
+gradient_boosting_model = GradientBoostingRegressor(n_estimators=100, random_state=42)
+
+linear_model.fit(X_train, y_train)
+random_forest_model.fit(X_train, y_train)
+gradient_boosting_model.fit(X_train, y_train)
+
+# Predict on the test set
+y_pred_linear = linear_model.predict(X_test)
+y_pred_rf = random_forest_model.predict(X_test)
+y_pred_gb = gradient_boosting_model.predict(X_test)
+
+# Evaluate model performance
+linear_rmse = mean_squared_error(y_test, y_pred_linear, squared=False)
+rf_rmse = mean_squared_error(y_test, y_pred_rf, squared=False)
+gb_rmse = mean_squared_error(y_test, y_pred_gb, squared=False)
+
+linear_r2 = r2_score(y_test, y_pred_linear)
+rf_r2 = r2_score(y_test, y_pred_rf)
+gb_r2 = r2_score(y_test, y_pred_gb)
+
+# Print results
+print(f"Linear Regression RMSE: {linear_rmse}, R2: {linear_r2}")
+print(f"Random Forest RMSE: {rf_rmse}, R2: {rf_r2}")
+print(f"Gradient Boosting RMSE: {gb_rmse}, R2: {gb_r2}")
+
+# Predict 2016 data
+X_2016 = data_2016[features]
+y_2016 = data_2016[target]
+y_pred_2016 = linear_model.predict(X_2016)
+rmse_2016 = mean_squared_error(y_2016, y_pred_2016, squared=False)
+r2_2016 = r2_score(y_2016, y_pred_2016)
+print(f"2016 Prediction RMSE: {rmse_2016}, R2: {r2_2016}")
